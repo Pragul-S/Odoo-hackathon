@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AssetFlow App (HTML + JS)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .hide { display: none !important; }
+        .tab-active { background-color: #2563eb; color: white; box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.5); }
+        .tab-inactive { color: #94a3b8; }
+        .tab-inactive:hover { background-color: #1e293b; color: white; }
+    </style>
+</head>
+<body class="bg-slate-50 h-screen overflow-hidden flex text-slate-800">
+
+    <!-- Sidebar -->
+    <aside class="w-64 bg-slate-900 flex flex-col h-full border-r border-slate-800 shrink-0 z-20">
+        <div class="h-16 flex items-center px-6 border-b border-slate-800">
+            <div class="w-8 h-8 bg-blue-600 text-white rounded flex items-center justify-center font-bold mr-3 shadow-lg shadow-blue-500/20">AF</div>
+            <span class="text-xl font-bold text-white tracking-tight">AssetFlow</span>
+        </div>
+        
+        <nav class="flex-1 py-6 px-4 space-y-1 overflow-y-auto" id="sidebar-nav">
+            <!-- Nav items injected by JS based on role -->
+        </nav>
+    </aside>
+
+    <!-- Main Content Area -->
+    <div class="flex-1 flex flex-col min-w-0">
+        
+        <!-- Header -->
+        <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 shrink-0 z-10">
+            <h1 class="text-lg font-semibold text-slate-800 capitalize" id="header-title">Dashboard</h1>
+            
+            <div class="flex items-center gap-6">
+                <!-- Role Switcher -->
+                <div class="flex items-center gap-2 bg-slate-100 p-1.5 rounded-lg border border-slate-200">
+                    <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider px-2">View As:</span>
+                    <select id="role-switcher" class="bg-white border-slate-300 text-sm rounded-md text-slate-700 font-medium px-2 py-1 focus:ring-blue-500 outline-none cursor-pointer">
+                        <!-- Options injected by JS -->
+                    </select>
+                </div>
+
+                <!-- User Profile -->
+                <div class="flex items-center gap-3">
+                    <div class="text-right hidden sm:block">
+                        <div class="text-sm font-bold text-slate-900" id="current-user-name">Loading...</div>
+                        <div class="text-xs text-blue-600 font-medium" id="current-user-role">...</div>
+                    </div>
+                    <div class="w-9 h-9 rounded-full bg-slate-200 flex items-center justify-center text-slate-500">
+                        <i class="fa-solid fa-user"></i>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Views Container -->
+        <main class="flex-1 overflow-y-auto p-6 lg:p-8 relative">
+            <div class="max-w-7xl mx-auto h-full relative">
+                
+                <!-- Loading Overlay -->
+                <div id="loading-overlay" class="absolute inset-0 bg-slate-50/80 backdrop-blur-sm z-50 flex flex-col items-center justify-center rounded-xl hide">
+                    <i class="fa-solid fa-circle-notch fa-spin text-4xl text-blue-600 mb-4"></i>
+                    <p class="text-slate-600 font-medium">Refreshing frontend view...</p>
+                </div>
+
+                <!-- Dashboard View -->
+                <div id="view-dashboard" class="view-section space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" id="dashboard-stats">
+                        <!-- Stats injected by JS -->
+                    </div>
+                    
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div class="lg:col-span-2 bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+                            <h3 class="text-lg font-bold text-slate-900 mb-4">Recent Activity</h3>
+                            <div class="space-y-4" id="recent-activity-list">
+                                <!-- Activity injected by JS -->
+                            </div>
+                        </div>
+                        
+                        <div class="bg-slate-50 rounded-xl border border-slate-200 shadow-sm p-6">
+                            <h3 class="text-lg font-bold text-slate-900 mb-4">Needs Attention</h3>
+                            <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-4 flex items-start gap-3">
+                                <i class="fa-solid fa-triangle-exclamation text-red-600 mt-1"></i>
+                                <div>
+                                    <h4 class="text-sm font-bold text-red-800">Overdue Return</h4>
+                                    <p class="text-xs text-red-600 mt-1">AF-0005 (Ergonomic Chair) was due yesterday.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Assets Directory View -->
+                <div id="view-assets" class="view-section hide h-full flex flex-col">
+                    <div class="flex justify-between items-center mb-6">
+                        <div class="relative w-72">
+                            <i class="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                            <input type="text" id="asset-search" placeholder="Search by tag or name..." class="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm">
+                        </div>
+                        <div class="flex gap-3">
+                            <button id="btn-open-modal" class="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 shadow-sm hide">
+                                <i class="fa-solid fa-plus mr-2"></i> Register Asset
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl border border-slate-200 shadow-sm flex-1 overflow-hidden flex flex-col">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-slate-50 border-b border-slate-200 text-xs uppercase tracking-wider text-slate-500">
+                                        <th class="px-6 py-4 font-semibold">Asset Tag</th>
+                                        <th class="px-6 py-4 font-semibold">Asset Name</th>
+                                        <th class="px-6 py-4 font-semibold">Category</th>
+                                        <th class="px-6 py-4 font-semibold">Status</th>
+                                        <th class="px-6 py-4 font-semibold">Holder/Location</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="assets-table-body" class="divide-y divide-slate-100">
+                                    <!-- Rows injected by JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Placeholder View for other tabs -->
+                <div id="view-placeholder" class="view-section hide h-full flex flex-col items-center justify-center text-center p-8 border-2 border-dashed border-slate-200 rounded-xl bg-slate-50/50">
+                    <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-sm border border-slate-100 mb-4 text-slate-400 text-2xl">
+                        <i class="fa-solid fa-wrench"></i>
+                    </div>
+                    <h2 class="text-xl font-bold text-slate-800 mb-2" id="placeholder-title">Module</h2>
+                    <p class="text-slate-500 max-w-md">This module is presented as a frontend-only workflow preview for the current screen.</p>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Add Asset Modal -->
+    <div id="add-asset-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hide">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden transform transition-all">
+            <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center">
+                <h2 class="text-lg font-bold text-slate-900">Register New Asset</h2>
+                <button id="btn-close-modal" class="text-slate-400 hover:text-slate-600">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            <form id="add-asset-form" class="p-6 space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Asset Name</label>
+                    <input type="text" id="form-asset-name" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Category</label>
+                    <select id="form-asset-category" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                        <option value="Electronics">Electronics</option>
+                        <option value="Furniture">Furniture</option>
+                        <option value="Vehicles">Vehicles</option>
+                        <option value="Equipment">Equipment</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Location</label>
+                    <input type="text" id="form-asset-location" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+                <div class="pt-4 flex gap-3">
+                    <button type="button" id="btn-cancel-modal" class="flex-1 px-4 py-2 border border-slate-300 text-slate-700 rounded-lg font-medium hover:bg-slate-50">Cancel</button>
+                    <button type="submit" class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700">Register in DB</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="assetflow_frontend_app.js"></script>
+</body>
+</html>
