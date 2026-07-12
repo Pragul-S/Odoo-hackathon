@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AssetFlow - Enterprise Asset & Resource Management System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .hide { display: none !important; }
+        .tab-active { background-color: #2563eb; color: white; box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.5); }
+        .tab-inactive { color: #94a3b8; }
+        .tab-inactive:hover { background-color: #1e293b; color: white; }
+        .auth-panel { background: linear-gradient(135deg, rgba(15, 23, 42, 0.98), rgba(30, 41, 59, 0.94)); }
+        .auth-glow { box-shadow: 0 12px 40px rgba(37, 99, 235, 0.3); }
+        .admin-tab.active { background-color: #2563eb; color: white; }
+        .admin-tab { border: 1px solid #cbd5e1; border-radius: 999px; padding: 0.5rem 1rem; font-size: 0.8rem; font-weight: 700; color: #475569; }
+    </style>
+</head>
+<body class="bg-slate-950">
+    <div id="auth-screen" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4">
+        <div class="auth-panel auth-glow w-full max-w-5xl rounded-3xl overflow-hidden grid grid-cols-1 lg:grid-cols-[1.1fr_0.9fr]">
+            <div class="p-8 lg:p-10 text-white">
+                <div class="inline-flex items-center px-3 py-1 bg-white/10 rounded-full text-xs font-bold uppercase tracking-[0.3em] mb-5">Enterprise ERP Demo</div>
+                <h1 class="text-4xl font-bold mb-3">AssetFlow</h1>
+                <p class="text-slate-200 text-sm max-w-lg mb-6">Organize departments, assets, bookings, maintenance, and audit workflows from a single responsive frontend workflow.</p>
+                <div class="grid grid-cols-2 gap-3 text-sm">
+                    <div class="bg-white/10 rounded-xl p-4"><strong>Admin</strong><br><span class="text-slate-300">Org setup & role promotion</span></div>
+                    <div class="bg-white/10 rounded-xl p-4"><strong>Asset Manager</strong><br><span class="text-slate-300">Registration & approvals</span></div>
+                    <div class="bg-white/10 rounded-xl p-4"><strong>Department Head</strong><br><span class="text-slate-300">Department-level oversight</span></div>
+                    <div class="bg-white/10 rounded-xl p-4"><strong>Employee</strong><br><span class="text-slate-300">Assignments & requests</span></div>
+                </div>
+            </div>
+
+            <div class="bg-white p-8 lg:p-10">
+                <div class="flex gap-2 bg-slate-100 rounded-full p-1 mb-6">
+                    <button type="button" id="btn-show-login" class="flex-1 rounded-full py-2 text-sm font-semibold bg-blue-600 text-white">Login</button>
+                    <button type="button" id="btn-show-signup" class="flex-1 rounded-full py-2 text-sm font-semibold text-slate-600">Signup</button>
+                </div>
+
+                <form id="login-form" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Email</label>
+                        <input type="email" id="login-email" value="sarah@assetflow.com" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Password</label>
+                        <div class="relative">
+                            <input type="password" id="login-password" value="demo123" required class="w-full px-3 py-2 pr-10 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                            <button type="button" id="btn-toggle-password" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-700" aria-label="Show password">
+                                <i class="fa-solid fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Inline Error Msg Container -->
+                    <div id="login-error-container" class="hide bg-red-50 text-red-700 border border-red-200 text-xs font-semibold p-3 rounded-lg flex items-start gap-2">
+                        <i class="fa-solid fa-triangle-exclamation mt-0.5"></i>
+                        <span id="login-error-text">Incorrect email or password.</span>
+                    </div>
+                    <div class="flex items-center justify-between gap-3">
+                        <label class="flex items-center gap-2 text-sm text-slate-600">
+                            <input type="checkbox" id="remember-me" class="rounded border-slate-300">
+                            Remember me
+                        </label>
+                        <button type="button" id="btn-forgot-password" class="text-sm text-blue-600 font-medium">Forgot password?</button>
+                    </div>
+                    <button type="submit" class="w-full px-4 py-2.5 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700">Login to AssetFlow</button>
+                </form>
+
+                <form id="signup-form" class="space-y-4 hide">
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Full Name</label>
+                        <input type="text" id="signup-name" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Email</label>
+                        <input type="email" id="signup-email" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Password</label>
+                        <input type="password" id="signup-password" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+                    <!-- Inline Error Msg Container -->
+                    <div id="signup-error-container" class="hide bg-red-50 text-red-700 border border-red-200 text-xs font-semibold p-3 rounded-lg flex items-start gap-2">
+                        <i class="fa-solid fa-triangle-exclamation mt-0.5"></i>
+                        <span id="signup-error-text">Email address is already in use.</span>
+                    </div>
+                    <div class="rounded-lg bg-blue-50 border border-blue-100 p-3 text-xs text-blue-700">
+                        Signup creates a pending Employee account. Admin approval is required before the user can access the dashboard.
+                    </div>
+                    <button type="submit" class="w-full px-4 py-2.5 rounded-lg bg-slate-900 text-white font-semibold hover:bg-slate-800">Request Access</button>
+                </form>
+
+                <form id="forgot-password-form" class="space-y-4 hide">
+                    <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-1">Reset Password</h3>
+                    <p class="text-xs text-slate-500">Enter your registered email address to receive a temporary 6-digit verification code.</p>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Email Address</label>
+                        <input type="email" id="forgot-email" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+                    <!-- Inline Error Msg Container -->
+                    <div id="forgot-error-container" class="hide bg-red-50 text-red-700 border border-red-200 text-xs font-semibold p-3 rounded-lg flex items-start gap-2">
+                        <i class="fa-solid fa-triangle-exclamation mt-0.5"></i>
+                        <span id="forgot-error-text">No account found with this email.</span>
+                    </div>
+                    <div class="flex gap-2">
+                        <button type="button" id="btn-back-to-login" class="flex-1 px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-50 text-xs font-bold text-slate-700">Cancel</button>
+                        <button type="submit" class="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold">Request Code</button>
+                    </div>
+                </form>
+
+                <form id="reset-password-form" class="space-y-4 hide">
+                    <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-1">Verify Code & Reset</h3>
+                    <p class="text-xs text-slate-500">For offline/demo testing convenience, the generated code is also printed in the success popup alert.</p>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Email Address</label>
+                        <input type="email" id="reset-email" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">6-Digit Verification Code</label>
+                        <input type="text" id="reset-code" required placeholder="e.g. 123456" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">New Password</label>
+                        <input type="password" id="reset-new-password" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+                    <!-- Inline Error Msg Container -->
+                    <div id="reset-error-container" class="hide bg-red-50 text-red-700 border border-red-200 text-xs font-semibold p-3 rounded-lg flex items-start gap-2">
+                        <i class="fa-solid fa-triangle-exclamation mt-0.5"></i>
+                        <span id="reset-error-text">Invalid or expired reset code.</span>
+                    </div>
+                    <div class="flex gap-2">
+                        <button type="button" id="btn-back-to-forgot" class="flex-1 px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-50 text-xs font-bold text-slate-700">Back</button>
+                        <button type="submit" class="flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-xs font-bold">Change Password</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="app-shell" class="bg-slate-50 h-screen overflow-hidden flex text-slate-800 hide">
+
+        <!-- Sidebar -->
+        <aside class="w-64 bg-slate-900 flex flex-col h-full border-r border-slate-800 shrink-0 z-20">
+            <div class="h-16 flex items-center px-6 border-b border-slate-800">
+                <div class="w-8 h-8 bg-blue-600 text-white rounded flex items-center justify-center font-bold mr-3 shadow-lg shadow-blue-500/20">AF</div>
+                <span class="text-xl font-bold text-white tracking-tight">AssetFlow</span>
+            </div>
+            
+            <nav class="flex-1 py-6 px-4 space-y-1 overflow-y-auto" id="sidebar-nav">
+                <!-- Nav items injected by JS based on role -->
+            </nav>
+        </aside>
+
+        <!-- Main Content Area -->
+        <div class="flex-1 flex flex-col min-w-0">
+            
+            <!-- Header -->
+            <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 shrink-0 z-10">
+                <h1 class="text-lg font-semibold text-slate-800 capitalize" id="header-title">Dashboard</h1>
+                
+                <div class="flex items-center gap-6">
+                    <!-- Role Switcher -->
+                    <div class="flex items-center gap-2 bg-slate-100 p-1.5 rounded-lg border border-slate-200">
+                        <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider px-2">View As:</span>
+                        <select id="role-switcher" class="bg-white border-slate-300 text-sm rounded-md text-slate-700 font-medium px-2 py-1 focus:ring-blue-500 outline-none cursor-pointer">
+                            <!-- Options injected by JS -->
+                        </select>
+                    </div>
+
+                    <!-- User Profile -->
+                    <div class="flex items-center gap-3">
+                        <div class="text-right hidden sm:block">
+                            <div class="text-sm font-bold text-slate-900" id="current-user-name">Loading...</div>
+                            <div class="text-xs text-blue-600 font-medium" id="current-user-role">...</div>
+                        </div>
+                        <div class="w-9 h-9 rounded-full bg-slate-200 flex items-center justify-center text-slate-500">
+                            <i class="fa-solid fa-user"></i>
+                        </div>
+                        <button type="button" id="btn-signout" class="px-3 py-2 rounded-lg border border-slate-300 text-sm font-semibold text-slate-700 hover:bg-slate-50">Sign Out</button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Views Container -->
+            <main class="flex-1 overflow-y-auto p-6 lg:p-8 relative">
+                <div class="max-w-7xl mx-auto h-full relative">
+                    
+                    <!-- Loading Overlay -->
+                    <div id="loading-overlay" class="absolute inset-0 bg-slate-50/80 backdrop-blur-sm z-50 flex flex-col items-center justify-center rounded-xl hide">
+                        <i class="fa-solid fa-circle-notch fa-spin text-4xl text-blue-600 mb-4"></i>
+                        <p class="text-slate-600 font-medium">Refreshing frontend view...</p>
+                    </div>
+
+                    <!-- Dashboard View -->
+                    <div id="view-dashboard" class="view-section space-y-6">
+                        <div class="bg-gradient-to-r from-blue-700 to-indigo-600 rounded-2xl p-6 text-white shadow-lg">
+                            <p class="text-xs uppercase tracking-[0.24em] text-blue-100 mb-2">Enterprise Asset & Resource Management System</p>
+                            <h2 class="text-2xl font-bold mb-2">AssetFlow Dashboard</h2>
+                            <p class="text-sm text-blue-50 max-w-3xl">Track real-time allocations, resource bookings, repair requests, active audit cycles, and role-based operational workloads.</p>
+                        </div>
+
+                        <!-- KPI Stats Grids -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="dashboard-stats">
+                            <!-- Injected by JS dynamically -->
+                        </div>
+
+                        <!-- Quick Actions Panel -->
+                        <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+                            <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider mb-4">Quick Actions</h3>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                <button type="button" onclick="document.getElementById('add-asset-modal').classList.remove('hide')" class="flex items-center justify-center gap-3 px-4 py-3 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-xl font-semibold border border-blue-200 transition-colors">
+                                    <i class="fa-solid fa-plus-circle text-lg"></i> Register New Asset
+                                </button>
+                                <button type="button" onclick="navigateTo('bookings')" class="flex items-center justify-center gap-3 px-4 py-3 bg-violet-50 hover:bg-violet-100 text-violet-700 rounded-xl font-semibold border border-violet-200 transition-colors">
+                                    <i class="fa-solid fa-calendar-plus text-lg"></i> Book Resource
+                                </button>
+                                <button type="button" onclick="navigateTo('maintenance')" class="flex items-center justify-center gap-3 px-4 py-3 bg-amber-50 hover:bg-amber-100 text-amber-700 rounded-xl font-semibold border border-amber-200 transition-colors">
+                                    <i class="fa-solid fa-screwdriver-wrench text-lg"></i> Raise Maintenance
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                            <div class="lg:col-span-2 bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+                                <h3 class="text-lg font-bold text-slate-900 mb-4">Recent Audit Activity Log</h3>
+                                <div class="space-y-4 max-h-[350px] overflow-y-auto" id="recent-activity-list">
+                                    <!-- Log injected by JS -->
+                                </div>
+                            </div>
+                            
+                            <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6 flex flex-col h-full">
+                                <h3 class="text-lg font-bold text-slate-900 mb-4 text-red-600"><i class="fa-solid fa-bell-exclamation mr-2"></i>Needs Attention (Overdue Returns)</h3>
+                                <div class="space-y-3 flex-1 overflow-y-auto max-h-[350px]" id="overdue-attention-list">
+                                    <!-- Injected dynamically -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Assets Directory View -->
+                    <div id="view-assets" class="view-section hide h-full flex flex-col space-y-4">
+                        <div class="flex flex-col gap-4 bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                            <div class="flex justify-between items-center">
+                                <h3 class="text-lg font-bold text-slate-900">Asset Directory & Search</h3>
+                                <button id="btn-open-modal" class="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 shadow-sm hide">
+                                    <i class="fa-solid fa-plus mr-2"></i> Register Asset
+                                </button>
+                            </div>
+
+                            <!-- Advanced Filters & Barcode Scan -->
+                            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
+                                <div class="relative md:col-span-2">
+                                    <i class="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                                    <input type="text" id="asset-search" placeholder="Search Tag, Serial, Name, Location..." class="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm">
+                                </div>
+                                <select id="filter-category" class="px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white outline-none">
+                                    <option value="">All Categories</option>
+                                </select>
+                                <select id="filter-status" class="px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white outline-none">
+                                    <option value="">All Lifecycle States</option>
+                                    <option value="Available">Available</option>
+                                    <option value="Allocated">Allocated</option>
+                                    <option value="Reserved">Reserved</option>
+                                    <option value="Under Maintenance">Under Maintenance</option>
+                                    <option value="Lost">Lost</option>
+                                    <option value="Retired">Retired</option>
+                                    <option value="Disposed">Disposed</option>
+                                </select>
+                                <button type="button" id="btn-simulate-qr" class="flex items-center justify-center px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-sm font-semibold transition-colors">
+                                    <i class="fa-solid fa-qrcode mr-2"></i> Scan QR/Barcode
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-xl border border-slate-200 shadow-sm flex-1 overflow-hidden flex flex-col">
+                            <div class="overflow-x-auto flex-1">
+                                <table class="w-full text-left border-collapse">
+                                    <thead>
+                                        <tr class="bg-slate-50 border-b border-slate-200 text-xs uppercase tracking-wider text-slate-500">
+                                            <th class="px-6 py-4 font-semibold">Asset Tag</th>
+                                            <th class="px-6 py-4 font-semibold">Asset Details</th>
+                                            <th class="px-6 py-4 font-semibold">Category</th>
+                                            <th class="px-6 py-4 font-semibold">Holder</th>
+                                            <th class="px-6 py-4 font-semibold">Condition</th>
+                                            <th class="px-6 py-4 font-semibold">Status</th>
+                                            <th class="px-6 py-4 font-semibold">Location</th>
+                                            <th class="px-6 py-4 font-semibold text-center">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="assets-table-body" class="divide-y divide-slate-100">
+                                        <!-- Injected dynamically -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Allocation & Transfer View -->
+                    <div id="view-allocations" class="view-section hide h-full flex flex-col space-y-6">
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                            <form id="allocation-form" class="lg:col-span-1 bg-white rounded-xl border border-slate-200 p-5 space-y-4 h-fit shadow-sm">
+                                <h3 class="text-lg font-bold text-slate-900 border-b pb-2"><i class="fa-solid fa-hand-holding-box text-blue-600 mr-2"></i>New Allocation</h3>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">Select Asset</label>
+                                    <select id="allocation-asset" required class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white outline-none focus:ring-2 focus:ring-blue-500"></select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">Assign to Employee</label>
+                                    <select id="allocation-assignee" required class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white outline-none focus:ring-2 focus:ring-blue-500"></select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">Department</label>
+                                    <input type="text" id="allocation-department" readonly class="w-full px-3 py-2 border border-slate-200 bg-slate-50 text-slate-600 rounded-lg text-sm outline-none">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">Expected Return Date (Optional)</label>
+                                    <input type="date" id="allocation-return-date" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500">
+                                </div>
+                                <button type="submit" class="w-full px-4 py-2.5 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 transition-colors shadow-md">Submit Allocation</button>
+                            </form>
+
+                            <div class="lg:col-span-2 bg-white rounded-xl border border-slate-200 p-5 shadow-sm flex flex-col">
+                                <h3 class="text-lg font-bold text-slate-900 mb-4 border-b pb-2"><i class="fa-solid fa-list-check text-blue-600 mr-2"></i>Active Allocations</h3>
+                                <div id="allocation-list" class="space-y-3 flex-1 overflow-y-auto max-h-[450px]">
+                                    <!-- Injected dynamically -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Transfer Requests Queue -->
+                        <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+                            <h3 class="text-lg font-bold text-slate-900 mb-4 border-b pb-2"><i class="fa-solid fa-arrow-right-arrow-left text-violet-600 mr-2"></i>Transfer Requests Queue</h3>
+                            <div id="transfer-list" class="space-y-3 max-h-[300px] overflow-y-auto">
+                                <!-- Injected dynamically -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Resource Booking View -->
+                    <div id="view-bookings" class="view-section hide h-full flex flex-col space-y-6">
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                            <form id="booking-form" class="lg:col-span-1 bg-white rounded-xl border border-slate-200 p-5 space-y-4 h-fit shadow-sm">
+                                <h3 class="text-lg font-bold text-slate-900 border-b pb-2"><i class="fa-solid fa-clock-three text-violet-600 mr-2"></i>Book Shared Resource</h3>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">Select Resource</label>
+                                    <select id="booking-resource" required class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white outline-none focus:ring-2 focus:ring-blue-500"></select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">Booking Date</label>
+                                    <input type="date" id="booking-date" required class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500">
+                                </div>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">Start Time</label>
+                                        <input type="time" id="booking-start" required class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">End Time</label>
+                                        <input type="time" id="booking-end" required class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500">
+                                    </div>
+                                </div>
+                                <button type="submit" class="w-full px-4 py-2.5 bg-violet-600 text-white rounded-lg font-bold hover:bg-violet-700 transition-colors shadow-md">Confirm Booking</button>
+                            </form>
+
+                            <div class="lg:col-span-2 bg-white rounded-xl border border-slate-200 p-5 shadow-sm flex flex-col">
+                                <h3 class="text-lg font-bold text-slate-900 mb-4 border-b pb-2"><i class="fa-solid fa-calendar-days text-violet-600 mr-2"></i>Booking Schedule & Calendar</h3>
+                                <div id="booking-list" class="space-y-3 flex-1 overflow-y-auto max-h-[450px]">
+                                    <!-- Injected dynamically -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Maintenance View -->
+                    <div id="view-maintenance" class="view-section hide h-full flex flex-col space-y-6">
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                            <form id="maintenance-form" class="lg:col-span-1 bg-white rounded-xl border border-slate-200 p-5 space-y-4 h-fit shadow-sm">
+                                <h3 class="text-lg font-bold text-slate-900 border-b pb-2"><i class="fa-solid fa-screwdriver-wrench text-amber-600 mr-2"></i>Raise Repair Request</h3>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">Select Asset</label>
+                                    <select id="maintenance-asset" required class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white outline-none focus:ring-2 focus:ring-blue-500"></select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">Describe Issue</label>
+                                    <textarea id="maintenance-issue" rows="4" placeholder="Describe mechanical or functional problems..." required class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">Priority Level</label>
+                                    <select id="maintenance-priority" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white outline-none focus:ring-2 focus:ring-blue-500">
+                                        <option value="Low">Low</option>
+                                        <option value="Medium" selected>Medium</option>
+                                        <option value="High">High</option>
+                                    </select>
+                                </div>
+                                <button type="submit" class="w-full px-4 py-2.5 bg-amber-600 text-white rounded-lg font-bold hover:bg-amber-700 transition-colors shadow-md">Submit Request</button>
+                            </form>
+
+                            <div class="lg:col-span-2 bg-white rounded-xl border border-slate-200 p-5 shadow-sm flex flex-col">
+                                <h3 class="text-lg font-bold text-slate-900 mb-4 border-b pb-2"><i class="fa-solid fa-traffic-cone text-amber-600 mr-2"></i>Maintenance Workflow Queue</h3>
+                                <div id="maintenance-list" class="space-y-3 flex-1 overflow-y-auto max-h-[450px]">
+                                    <!-- Injected dynamically -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Audit View -->
+                    <div id="view-audit" class="view-section hide h-full flex flex-col space-y-6">
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                            <form id="audit-form" class="lg:col-span-1 bg-white rounded-xl border border-slate-200 p-5 space-y-4 h-fit shadow-sm">
+                                <h3 class="text-lg font-bold text-slate-900 border-b pb-2"><i class="fa-solid fa-file-shield text-emerald-600 mr-2"></i>Create Audit Cycle</h3>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">Scope Type</label>
+                                    <select id="audit-scope-type" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white outline-none focus:ring-2 focus:ring-blue-500">
+                                        <option value="Department">By Department</option>
+                                        <option value="Location">By Location</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">Scope Target Value</label>
+                                    <input type="text" id="audit-scope-value" placeholder="e.g. IT, Finance, IT Storage..." required class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500">
+                                </div>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">Start Date</label>
+                                        <input type="date" id="audit-start-date" required class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm outline-none">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">End Date</label>
+                                        <input type="date" id="audit-end-date" required class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm outline-none">
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">Assign Auditor(s) (Ctrl+Click)</label>
+                                    <select id="audit-auditors" multiple required class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white outline-none h-28 focus:ring-2 focus:ring-blue-500"></select>
+                                </div>
+                                <button type="submit" class="w-full px-4 py-2.5 bg-emerald-600 text-white rounded-lg font-bold hover:bg-emerald-700 transition-colors shadow-md">Create Cycle</button>
+                            </form>
+
+                            <div class="lg:col-span-2 bg-white rounded-xl border border-slate-200 p-5 shadow-sm flex flex-col">
+                                <h3 class="text-lg font-bold text-slate-900 mb-4 border-b pb-2"><i class="fa-solid fa-folder-open text-emerald-600 mr-2"></i>Audit Cycles History</h3>
+                                <div id="audit-cycle-list" class="space-y-3 flex-1 overflow-y-auto max-h-[450px]">
+                                    <!-- Injected dynamically -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Reports View -->
+                    <div id="view-reports" class="view-section hide h-full flex flex-col space-y-6">
+                        <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+                            <div class="flex justify-between items-center border-b pb-3 mb-4">
+                                <h3 class="text-lg font-bold text-slate-900"><i class="fa-solid fa-chart-line text-blue-600 mr-2"></i>Analytics & Dynamic Reports</h3>
+                                <button type="button" id="btn-export-csv" class="flex items-center px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-sm font-semibold shadow-sm transition-colors">
+                                    <i class="fa-solid fa-download mr-2"></i> Export Assets to CSV
+                                </button>
+                            </div>
+                            <div id="reports-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                                <!-- Dynamic counters injected by JS -->
+                            </div>
+
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                <!-- Department summary -->
+                                <div class="border rounded-xl p-4 bg-slate-50">
+                                    <h4 class="text-sm font-bold text-slate-800 mb-3 uppercase tracking-wider">Department Asset Summary</h4>
+                                    <div class="overflow-x-auto">
+                                        <table class="w-full text-left text-xs">
+                                            <thead>
+                                                <tr class="border-b text-slate-500 font-semibold uppercase">
+                                                    <th class="py-2">Department</th>
+                                                    <th class="py-2 text-right">Asset Count</th>
+                                                    <th class="py-2 text-right">Total Cost</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="rep-dept-summary" class="divide-y text-slate-700">
+                                                <!-- Injected -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <!-- Booking and Utilization summary -->
+                                <div class="border rounded-xl p-4 bg-slate-50">
+                                    <h4 class="text-sm font-bold text-slate-800 mb-3 uppercase tracking-wider">Shared Resource Utilization (Heatmap)</h4>
+                                    <div class="space-y-2" id="rep-utilization">
+                                        <!-- Injected -->
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+                                <!-- Maintenance Frequency -->
+                                <div class="border rounded-xl p-4 bg-slate-50">
+                                    <h4 class="text-sm font-bold text-slate-800 mb-3 uppercase tracking-wider">Maintenance Frequency & Spend by Category</h4>
+                                    <div class="space-y-3" id="rep-maint-freq">
+                                        <!-- Injected -->
+                                    </div>
+                                </div>
+
+                                <!-- Retirement / Due Check -->
+                                <div class="border rounded-xl p-4 bg-slate-50">
+                                    <h4 class="text-sm font-bold text-slate-800 mb-3 uppercase tracking-wider">Assets Flagged for Retirement / Repair</h4>
+                                    <div class="overflow-y-auto max-h-[220px]" id="rep-retirement">
+                                        <!-- Injected -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Notifications View -->
+                    <div id="view-notifications" class="view-section hide h-full flex flex-col">
+                        <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+                            <div class="flex justify-between items-center border-b pb-3 mb-4">
+                                <h3 class="text-lg font-bold text-slate-900"><i class="fa-solid fa-bell text-blue-600 mr-2"></i>User Alerts & Notifications</h3>
+                                <button type="button" id="btn-clear-notifications" class="text-sm text-blue-600 hover:text-blue-800 font-semibold">Mark All Read</button>
+                            </div>
+                            <div id="notification-list" class="space-y-3 max-h-[600px] overflow-y-auto">
+                                <!-- Injected dynamically -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Organization Setup View -->
+                    <div id="view-admin" class="view-section hide h-full flex flex-col">
+                        <div class="flex flex-wrap gap-2 mb-6">
+                            <button type="button" class="admin-tab active" data-admin-tab="departments">Department Management</button>
+                            <button type="button" class="admin-tab" data-admin-tab="categories">Asset Category Management</button>
+                            <button type="button" class="admin-tab" data-admin-tab="employees">Employee Directory</button>
+                        </div>
+
+                        <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6 flex-1 overflow-y-auto">
+                            <div id="admin-tab-departments" class="admin-tab-panel space-y-4">
+                                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                                    <div class="lg:col-span-2">
+                                        <h3 class="text-lg font-bold text-slate-900 mb-3">Departments Hierarchy</h3>
+                                        <div id="admin-departments-list" class="space-y-3"></div>
+                                    </div>
+                                    <form id="department-form" class="bg-slate-50 rounded-xl p-4 border border-slate-200 h-fit space-y-3">
+                                        <h4 class="text-sm font-bold text-slate-900 mb-1" id="dep-form-title">Create Department</h4>
+                                        <input type="hidden" id="dep-edit-id" value="">
+                                        <div>
+                                            <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">Department Name</label>
+                                            <input type="text" id="dep-name" placeholder="Department name" required class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white outline-none">
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">Department Head</label>
+                                            <select id="dep-head" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white outline-none"></select>
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">Parent Department (Optional)</label>
+                                            <select id="dep-parent" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white outline-none">
+                                                <option value="">No Parent</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">Status</label>
+                                            <select id="dep-status" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white outline-none">
+                                                <option value="Active">Active</option>
+                                                <option value="Inactive">Inactive</option>
+                                            </select>
+                                        </div>
+                                        <div class="pt-2 flex gap-2">
+                                            <button type="button" id="btn-dep-reset" class="flex-1 px-3 py-1.5 border border-slate-300 text-slate-700 rounded-lg text-xs font-bold hover:bg-slate-50">Cancel</button>
+                                            <button type="submit" id="btn-dep-submit" class="flex-1 px-3 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-bold hover:bg-blue-700">Save</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <div id="admin-tab-categories" class="admin-tab-panel hide space-y-4">
+                                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                                    <div class="lg:col-span-2">
+                                        <h3 class="text-lg font-bold text-slate-900 mb-3">Asset Categories</h3>
+                                        <div id="admin-categories-list" class="space-y-3"></div>
+                                    </div>
+                                    <form id="category-form" class="bg-slate-50 rounded-xl p-4 border border-slate-200 h-fit space-y-3">
+                                        <h4 class="text-sm font-bold text-slate-900 mb-1" id="cat-form-title">Create Category</h4>
+                                        <input type="hidden" id="cat-edit-id" value="">
+                                        <div>
+                                            <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">Category Name</label>
+                                            <input type="text" id="cat-name" placeholder="Category name" required class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white outline-none">
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">Optional Specific Fields</label>
+                                            <input type="text" id="cat-fields" placeholder="e.g. warranty period, fuel policy" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white outline-none">
+                                        </div>
+                                        <div class="pt-2 flex gap-2">
+                                            <button type="button" id="btn-cat-reset" class="flex-1 px-3 py-1.5 border border-slate-300 text-slate-700 rounded-lg text-xs font-bold hover:bg-slate-50">Cancel</button>
+                                            <button type="submit" id="btn-cat-submit" class="flex-1 px-3 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-bold hover:bg-blue-700">Save</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <div id="admin-tab-employees" class="admin-tab-panel hide space-y-4">
+                                <h3 class="text-lg font-bold text-slate-900 mb-3">Employee Directory</h3>
+                                <div id="admin-employees-list" class="space-y-3"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Placeholder View for other tabs -->
+                    <div id="view-placeholder" class="view-section hide h-full flex flex-col items-center justify-center text-center p-8 border-2 border-dashed border-slate-200 rounded-xl bg-slate-50/50">
+                        <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-sm border border-slate-100 mb-4 text-slate-400 text-2xl">
+                            <i class="fa-solid fa-wrench"></i>
+                        </div>
+                        <h2 class="text-xl font-bold text-slate-800 mb-2" id="placeholder-title">Module</h2>
+                        <p class="text-slate-500 max-w-md" id="placeholder-description">This module is presented as a frontend-only workflow preview for the current screen.</p>
+                    </div>
+
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Register Asset Modal -->
+    <div id="add-asset-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hide">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden transform transition-all">
+            <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center">
+                <h2 class="text-lg font-bold text-slate-900">Register New Asset</h2>
+                <button type="button" onclick="document.getElementById('add-asset-modal').classList.add('hide')" class="text-slate-400 hover:text-slate-600">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            <form id="add-asset-form" class="p-6 space-y-3.5 max-h-[80vh] overflow-y-auto">
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Asset Name</label>
+                    <input type="text" id="form-asset-name" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Serial Number</label>
+                    <input type="text" id="form-asset-serial" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Category</label>
+                        <select id="form-asset-category" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-white"></select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Condition</label>
+                        <select id="form-asset-condition" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-white">
+                            <option value="Excellent">Excellent</option>
+                            <option value="Good">Good</option>
+                            <option value="Average">Average</option>
+                            <option value="Needs Repair">Needs Repair</option>
+                            <option value="Damaged">Damaged</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Location</label>
+                    <input type="text" id="form-asset-location" required placeholder="e.g. HQ-Floor 3" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm">
+                </div>
+                <div class="flex items-center gap-2 py-1.5">
+                    <input type="checkbox" id="form-asset-shared" class="rounded border-slate-300 focus:ring-blue-500">
+                    <label for="form-asset-shared" class="text-sm font-semibold text-slate-700 cursor-pointer">Register as Shared / Bookable Resource</label>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Purchase Date</label>
+                        <input type="date" id="form-asset-purchase-date" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-white">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Warranty Expiry</label>
+                        <input type="date" id="form-asset-warranty" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-white">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Acquisition Cost ($)</label>
+                        <input type="number" id="form-asset-cost" min="0" step="0.01" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Initial Status</label>
+                        <select id="form-asset-status" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-white">
+                            <option value="Available">Available</option>
+                            <option value="Allocated">Allocated</option>
+                            <option value="Under Maintenance">Under Maintenance</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="form-asset-owner-container" class="hide">
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Initially Allocate To</label>
+                    <select id="form-asset-owner" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-white">
+                        <option value="">Unassigned</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Attach Photo/Documents</label>
+                    <input type="file" id="form-asset-file" class="w-full text-xs text-slate-500 file:mr-4 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                </div>
+                <div class="pt-4 flex gap-3">
+                    <button type="button" onclick="document.getElementById('add-asset-modal').classList.add('hide')" class="flex-1 px-4 py-2 border border-slate-300 text-slate-700 rounded-lg font-medium hover:bg-slate-50">Cancel</button>
+                    <button type="submit" class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700">Register</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Asset Detail Modal -->
+    <div id="asset-details-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hide">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden transform transition-all">
+            <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-900 text-white">
+                <h2 class="text-lg font-bold" id="detail-title">Asset Details</h2>
+                <button type="button" onclick="document.getElementById('asset-details-modal').classList.add('hide')" class="text-slate-400 hover:text-white">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            <div class="p-6 space-y-6 max-h-[80vh] overflow-y-auto">
+                <div class="grid grid-cols-3 gap-6">
+                    <!-- Left: Metadata -->
+                    <div class="col-span-2 grid grid-cols-2 gap-4 text-sm" id="detail-meta-container">
+                        <!-- Injected by JS -->
+                    </div>
+                    <!-- Right: QR Code Mock -->
+                    <div class="col-span-1 flex flex-col items-center justify-center border rounded-xl p-3 bg-slate-50 text-center">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">QR Tag Scan</span>
+                        <div id="detail-qr" class="bg-white p-2 border rounded-lg mb-2">
+                            <i class="fa-solid fa-qrcode text-6xl text-slate-800"></i>
+                        </div>
+                        <span class="text-xs font-mono font-bold text-slate-700" id="detail-tag-label">AF-XXXX</span>
+                    </div>
+                </div>
+
+                <div class="border-t pt-4">
+                    <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-3"><i class="fa-solid fa-clock-rotate-left text-blue-600 mr-2"></i>Allocation Log Timeline</h3>
+                    <div class="space-y-2 max-h-[150px] overflow-y-auto text-xs" id="detail-allocation-history">
+                        <!-- Injected -->
+                    </div>
+                </div>
+
+                <div class="border-t pt-4">
+                    <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-3"><i class="fa-solid fa-wrench text-amber-600 mr-2"></i>Repair & Maintenance Logs</h3>
+                    <div class="space-y-2 max-h-[150px] overflow-y-auto text-xs" id="detail-maintenance-history">
+                        <!-- Injected -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Return Asset Check-In Modal -->
+    <div id="return-asset-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hide">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden transform transition-all">
+            <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center">
+                <h2 class="text-lg font-bold text-slate-900">Return Asset check-in</h2>
+                <button type="button" onclick="document.getElementById('return-asset-modal').classList.add('hide')" class="text-slate-400 hover:text-slate-600">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            <form id="return-asset-form" class="p-6 space-y-4">
+                <input type="hidden" id="return-asset-id" value="">
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Check-In Condition</label>
+                    <select id="return-condition" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-blue-500 outline-none">
+                        <option value="Excellent">Excellent</option>
+                        <option value="Good">Good</option>
+                        <option value="Average">Average</option>
+                        <option value="Needs Repair">Needs Repair (Re-routes to maintenance)</option>
+                        <option value="Damaged">Damaged / Broken</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Check-in Notes / Documents</label>
+                    <textarea id="return-notes" rows="3" placeholder="Condition details, check-in reports..." class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                </div>
+                <div class="pt-2 flex gap-3">
+                    <button type="button" onclick="document.getElementById('return-asset-modal').classList.add('hide')" class="flex-1 px-4 py-2 border border-slate-300 text-slate-700 rounded-lg font-medium hover:bg-slate-50">Cancel</button>
+                    <button type="submit" class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700">Check In</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Allocation Conflict / Transfer Request Dialog -->
+    <div id="transfer-conflict-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hide">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden transform transition-all border-2 border-red-500">
+            <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-red-50">
+                <h2 class="text-lg font-bold text-red-700 flex items-center"><i class="fa-solid fa-triangle-exclamation mr-2"></i>Allocation Conflict Detected</h2>
+                <button type="button" onclick="document.getElementById('transfer-conflict-modal').classList.add('hide')" class="text-slate-400 hover:text-slate-600">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            <div class="p-6 space-y-4">
+                <input type="hidden" id="conflict-asset-id" value="">
+                <input type="hidden" id="conflict-assignee-id" value="">
+                <input type="hidden" id="conflict-holder-id" value="">
+                <input type="hidden" id="conflict-department" value="">
+                
+                <p class="text-sm text-slate-600" id="conflict-message">
+                    This asset is currently held by Priya Sharma.
+                </p>
+                <div class="rounded-lg bg-yellow-50 border border-yellow-100 p-3.5 text-xs text-yellow-800">
+                    <strong>Notice:</strong> You cannot allocate an asset that is already taken. To proceed, you can submit an Asset Transfer Request to route it through approval.
+                </div>
+                <div class="pt-2 flex gap-3">
+                    <button type="button" onclick="document.getElementById('transfer-conflict-modal').classList.add('hide')" class="flex-1 px-4 py-2 border border-slate-300 text-slate-700 rounded-lg font-medium hover:bg-slate-50">Cancel</button>
+                    <button type="button" id="btn-submit-transfer" class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700">Request Transfer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Active Audit Execution View Modal -->
+    <div id="audit-execution-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hide">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-4xl overflow-hidden transform transition-all">
+            <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-900 text-white">
+                <h2 class="text-lg font-bold" id="audit-exec-title">Execute Audit Checklist</h2>
+                <button type="button" onclick="document.getElementById('audit-execution-modal').classList.add('hide')" class="text-slate-400 hover:text-white">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            <div class="p-6 space-y-6 max-h-[85vh] overflow-y-auto">
+                <div class="flex justify-between items-center bg-slate-50 border p-4 rounded-xl">
+                    <div>
+                        <div class="text-sm font-bold text-slate-900" id="audit-exec-scope">Scope: IT Storage</div>
+                        <div class="text-xs text-slate-500" id="audit-exec-dates">Date Range: 2026-07-12 - 2026-07-18</div>
+                    </div>
+                    <button type="button" id="btn-close-audit-cycle" class="px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-bold hover:bg-red-700 shadow-sm transition-colors">
+                        Lock & Close Audit Cycle
+                    </button>
+                </div>
+
+                <div class="space-y-4">
+                    <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider">Audit Asset Items Checklist</h3>
+                    <div class="overflow-x-auto border rounded-xl">
+                        <table class="w-full text-left text-xs">
+                            <thead>
+                                <tr class="bg-slate-100 border-b font-semibold text-slate-600 uppercase">
+                                    <th class="px-4 py-3">Tag</th>
+                                    <th class="px-4 py-3">Asset Name</th>
+                                    <th class="px-4 py-3">Location</th>
+                                    <th class="px-4 py-3">Audited Status Check</th>
+                                    <th class="px-4 py-3">Notes</th>
+                                    <th class="px-4 py-3 text-center">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="audit-exec-table-body" class="divide-y text-slate-700">
+                                <!-- Checklist rows injected here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="assetflow_frontend_app.js"></script>
+</body>
+</html>
