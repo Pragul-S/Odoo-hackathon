@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AssetFlow - Enterprise Asset & Resource Management System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assetflow_frontend_app.css">
+</head>
+<body class="bg-slate-950">
+    <div id="auth-screen" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4">
+        <div class="auth-panel auth-glow w-full max-w-5xl rounded-3xl overflow-hidden grid grid-cols-1 lg:grid-cols-[1.1fr_0.9fr]">
+            <div class="p-8 lg:p-10 text-white">
+                <div class="inline-flex items-center px-3 py-1 bg-white/10 rounded-full text-xs font-bold uppercase tracking-[0.3em] mb-5">Enterprise ERP Demo</div>
+                <h1 class="text-4xl font-bold mb-3">AssetFlow</h1>
+                <p class="text-slate-200 text-sm max-w-lg mb-6">Organize departments, assets, bookings, maintenance, and audit workflows from a single responsive frontend workflow.</p>
+                <div class="grid grid-cols-2 gap-3 text-sm">
+                    <div class="bg-white/10 rounded-xl p-4"><strong>Admin</strong><br><span class="text-slate-300">Org setup & role promotion</span></div>
+                    <div class="bg-white/10 rounded-xl p-4"><strong>Asset Manager</strong><br><span class="text-slate-300">Registration & approvals</span></div>
+                    <div class="bg-white/10 rounded-xl p-4"><strong>Department Head</strong><br><span class="text-slate-300">Department-level oversight</span></div>
+                    <div class="bg-white/10 rounded-xl p-4"><strong>Employee</strong><br><span class="text-slate-300">Assignments & requests</span></div>
+                </div>
+            </div>
+
+            <div class="bg-white p-8 lg:p-10">
+                <div class="flex gap-2 bg-slate-100 rounded-full p-1 mb-6">
+                    <button type="button" id="btn-show-login" class="flex-1 rounded-full py-2 text-sm font-semibold bg-blue-600 text-white">Login</button>
+                    <button type="button" id="btn-show-signup" class="flex-1 rounded-full py-2 text-sm font-semibold text-slate-600">Signup</button>
+                </div>
+
+                <form id="login-form" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Email</label>
+                        <input type="email" id="login-email" value="sarah@assetflow.com" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Password</label>
+                        <div class="relative">
+                            <input type="password" id="login-password" value="demo123" required class="w-full px-3 py-2 pr-10 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                            <button type="button" id="btn-toggle-password" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-700" aria-label="Show password">
+                                <i class="fa-solid fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between gap-3">
+                        <label class="flex items-center gap-2 text-sm text-slate-600">
+                            <input type="checkbox" id="remember-me" class="rounded border-slate-300">
+                            Remember me
+                        </label>
+                        <button type="button" id="btn-forgot-password" class="text-sm text-blue-600 font-medium">Forgot password?</button>
+                    </div>
+                    <button type="submit" class="w-full px-4 py-2.5 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700">Login to AssetFlow</button>
+                </form>
+
+                <form id="signup-form" class="space-y-4 hide">
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Full Name</label>
+                        <input type="text" id="signup-name" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Email</label>
+                        <input type="email" id="signup-email" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Password</label>
+                        <input type="password" id="signup-password" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+                    <div class="rounded-lg bg-blue-50 border border-blue-100 p-3 text-xs text-blue-700">
+                        Signup creates a pending Employee account. Admin approval is required before the user can access the dashboard.
+                    </div>
+                    <button type="submit" class="w-full px-4 py-2.5 rounded-lg bg-slate-900 text-white font-semibold hover:bg-slate-800">Request Access</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="app-shell" class="bg-slate-50 h-screen overflow-hidden flex text-slate-800 hide">
+
+        <!-- Sidebar -->
+        <aside class="w-64 bg-slate-900 flex flex-col h-full border-r border-slate-800 shrink-0 z-20">
+            <div class="h-16 flex items-center px-6 border-b border-slate-800">
+                <div class="w-8 h-8 bg-blue-600 text-white rounded flex items-center justify-center font-bold mr-3 shadow-lg shadow-blue-500/20">AF</div>
+                <span class="text-xl font-bold text-white tracking-tight">AssetFlow</span>
+            </div>
+            
+            <nav class="flex-1 py-6 px-4 space-y-1 overflow-y-auto" id="sidebar-nav">
+                <!-- Nav items injected by JS based on role -->
+            </nav>
+        </aside>
+
+        <!-- Main Content Area -->
+        <div class="flex-1 flex flex-col min-w-0">
+            
+            <!-- Header -->
+            <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 shrink-0 z-10">
+                <h1 class="text-lg font-semibold text-slate-800 capitalize" id="header-title">Dashboard</h1>
+                
+                <div class="flex items-center gap-6">
+                    <!-- Role Switcher -->
+                    <div class="flex items-center gap-2 bg-slate-100 p-1.5 rounded-lg border border-slate-200">
+                        <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider px-2">View As:</span>
+                        <select id="role-switcher" class="bg-white border-slate-300 text-sm rounded-md text-slate-700 font-medium px-2 py-1 focus:ring-blue-500 outline-none cursor-pointer">
+                            <!-- Options injected by JS -->
+                        </select>
+                    </div>
+
+                    <!-- User Profile -->
+                    <div class="flex items-center gap-3">
+                        <div class="text-right hidden sm:block">
+                            <div class="text-sm font-bold text-slate-900" id="current-user-name">Loading...</div>
+                            <div class="text-xs text-blue-600 font-medium" id="current-user-role">...</div>
+                        </div>
+                        <div class="w-9 h-9 rounded-full bg-slate-200 flex items-center justify-center text-slate-500">
+                            <i class="fa-solid fa-user"></i>
+                        </div>
+                        <button type="button" id="btn-signout" class="px-3 py-2 rounded-lg border border-slate-300 text-sm font-semibold text-slate-700 hover:bg-slate-50">Sign Out</button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Views Container -->
+            <main class="flex-1 overflow-y-auto p-6 lg:p-8 relative">
+                <div class="max-w-7xl mx-auto h-full relative">
+                    
+                    <!-- Loading Overlay -->
+                    <div id="loading-overlay" class="absolute inset-0 bg-slate-50/80 backdrop-blur-sm z-50 flex flex-col items-center justify-center rounded-xl hide">
+                        <i class="fa-solid fa-circle-notch fa-spin text-4xl text-blue-600 mb-4"></i>
+                        <p class="text-slate-600 font-medium">Refreshing frontend view...</p>
+                    </div>
+
+                    <!-- Dashboard View -->
+                    <div id="view-dashboard" class="view-section space-y-6">
+                        <div class="bg-gradient-to-r from-blue-700 to-indigo-600 rounded-2xl p-6 text-white shadow-lg">
+                            <p class="text-xs uppercase tracking-[0.24em] text-blue-100 mb-2">Enterprise Asset & Resource Management System</p>
+                            <h2 class="text-2xl font-bold mb-2">AssetFlow</h2>
+                            <p class="text-sm text-blue-50 max-w-3xl">Centralize asset lifecycle, allocation, shared-resource bookings, maintenance approvals, audit cycles, and role-based operations for any organization.</p>
+                            <div class="mt-4 flex flex-wrap gap-3">
+                                <span class="rounded-full bg-white/15 px-3 py-1 text-xs font-semibold">Register Assets</span>
+                                <span class="rounded-full bg-white/15 px-3 py-1 text-xs font-semibold">Book Resources</span>
+                                <span class="rounded-full bg-white/15 px-3 py-1 text-xs font-semibold">Track Maintenance</span>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="dashboard-stats">
+                            <!-- Stats injected by JS -->
+                        </div>
+                        
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                            <div class="lg:col-span-2 bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+                                <h3 class="text-lg font-bold text-slate-900 mb-4">Recent Activity</h3>
+                                <div class="space-y-4" id="recent-activity-list">
+                                    <!-- Activity injected by JS -->
+                                </div>
+                            </div>
+                            
+                            <div class="bg-slate-50 rounded-xl border border-slate-200 shadow-sm p-6">
+                                <h3 class="text-lg font-bold text-slate-900 mb-4">Needs Attention</h3>
+                                <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-4 flex items-start gap-3">
+                                    <i class="fa-solid fa-triangle-exclamation text-red-600 mt-1"></i>
+                                    <div>
+                                        <h4 class="text-sm font-bold text-red-800">Overdue Return</h4>
+                                        <p class="text-xs text-red-600 mt-1">AF-0005 (Ergonomic Chair) was due yesterday.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Assets Directory View -->
+                    <div id="view-assets" class="view-section hide h-full flex flex-col">
+                        <div class="flex justify-between items-center mb-6">
+                            <div class="relative w-72">
+                                <i class="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                                <input type="text" id="asset-search" placeholder="Search by tag or name..." class="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm">
+                            </div>
+                            <div class="flex gap-3">
+                                <button id="btn-open-modal" class="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 shadow-sm hide">
+                                    <i class="fa-solid fa-plus mr-2"></i> Register Asset
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-xl border border-slate-200 shadow-sm flex-1 overflow-hidden flex flex-col">
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left border-collapse">
+                                    <thead>
+                                        <tr class="bg-slate-50 border-b border-slate-200 text-xs uppercase tracking-wider text-slate-500">
+                                            <th class="px-6 py-4 font-semibold">Asset Tag</th>
+                                            <th class="px-6 py-4 font-semibold">Asset Name</th>
+                                            <th class="px-6 py-4 font-semibold">Assigned To</th>
+                                            <th class="px-6 py-4 font-semibold">Purchase Date</th>
+                                            <th class="px-6 py-4 font-semibold">Warranty Expiry</th>
+                                            <th class="px-6 py-4 font-semibold">Repair History</th>
+                                            <th class="px-6 py-4 font-semibold">Status</th>
+                                            <th class="px-6 py-4 font-semibold">Location</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="assets-table-body" class="divide-y divide-slate-100">
+                                        <!-- Rows injected by JS -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Allocation & Transfer View -->
+                    <div id="view-allocations" class="view-section hide h-full flex flex-col">
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                            <form id="allocation-form" class="lg:col-span-1 bg-white rounded-xl border border-slate-200 p-5 space-y-3">
+                                <h3 class="text-lg font-bold text-slate-900">Allocate Asset</h3>
+                                <select id="allocation-asset" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm"></select>
+                                <select id="allocation-assignee" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm"></select>
+                                <input type="text" id="allocation-department" placeholder="Department" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm">
+                                <input type="date" id="allocation-return-date" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm">
+                                <button type="submit" class="w-full px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700">Create Allocation</button>
+                            </form>
+                            <div class="lg:col-span-2 bg-white rounded-xl border border-slate-200 p-5">
+                                <h3 class="text-lg font-bold text-slate-900 mb-4">Allocation Queue</h3>
+                                <div id="allocation-list" class="space-y-3"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Resource Booking View -->
+                    <div id="view-bookings" class="view-section hide h-full flex flex-col">
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                            <form id="booking-form" class="lg:col-span-1 bg-white rounded-xl border border-slate-200 p-5 space-y-3">
+                                <h3 class="text-lg font-bold text-slate-900">Book Shared Resource</h3>
+                                <select id="booking-resource" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm"></select>
+                                <input type="time" id="booking-start" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm">
+                                <input type="time" id="booking-end" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm">
+                                <button type="submit" class="w-full px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700">Confirm Booking</button>
+                            </form>
+                            <div class="lg:col-span-2 bg-white rounded-xl border border-slate-200 p-5">
+                                <h3 class="text-lg font-bold text-slate-900 mb-4">Booking Calendar</h3>
+                                <div id="booking-list" class="space-y-3"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Maintenance View -->
+                    <div id="view-maintenance" class="view-section hide h-full flex flex-col">
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                            <form id="maintenance-form" class="lg:col-span-1 bg-white rounded-xl border border-slate-200 p-5 space-y-3">
+                                <h3 class="text-lg font-bold text-slate-900">Raise Maintenance Request</h3>
+                                <select id="maintenance-asset" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm"></select>
+                                <textarea id="maintenance-issue" rows="4" placeholder="Describe the issue" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm"></textarea>
+                                <select id="maintenance-priority" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm">
+                                    <option>Low</option>
+                                    <option>Medium</option>
+                                    <option>High</option>
+                                </select>
+                                <button type="submit" class="w-full px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700">Submit Request</button>
+                            </form>
+                            <div class="lg:col-span-2 bg-white rounded-xl border border-slate-200 p-5">
+                                <h3 class="text-lg font-bold text-slate-900 mb-4">Maintenance Workflow</h3>
+                                <div id="maintenance-list" class="space-y-3"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Audit View -->
+                    <div id="view-audit" class="view-section hide h-full flex flex-col">
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                            <form id="audit-form" class="lg:col-span-1 bg-white rounded-xl border border-slate-200 p-5 space-y-3">
+                                <h3 class="text-lg font-bold text-slate-900">Create Audit Cycle</h3>
+                                <input type="text" id="audit-scope" placeholder="Department or location scope" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm">
+                                <input type="text" id="audit-date-range" placeholder="Date range" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm">
+                                <select id="audit-auditors" multiple class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm h-32"></select>
+                                <button type="submit" class="w-full px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700">Create Audit Cycle</button>
+                            </form>
+                            <div class="lg:col-span-2 bg-white rounded-xl border border-slate-200 p-5">
+                                <h3 class="text-lg font-bold text-slate-900 mb-4">Audit Cycle History</h3>
+                                <div id="audit-cycle-list" class="space-y-3"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Reports View -->
+                    <div id="view-reports" class="view-section hide h-full flex flex-col">
+                        <div class="bg-white rounded-xl border border-slate-200 p-6">
+                            <h3 class="text-lg font-bold text-slate-900 mb-4">Reports & Analytics</h3>
+                            <div id="reports-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"></div>
+                        </div>
+                    </div>
+
+                    <!-- Notifications View -->
+                    <div id="view-notifications" class="view-section hide h-full flex flex-col">
+                        <div class="bg-white rounded-xl border border-slate-200 p-6">
+                            <h3 class="text-lg font-bold text-slate-900 mb-4">Activity Logs & Notifications</h3>
+                            <div id="notification-list" class="space-y-3"></div>
+                        </div>
+                    </div>
+
+                    <!-- Organization Setup View -->
+                    <div id="view-admin" class="view-section hide h-full flex flex-col">
+                        <div class="flex flex-wrap gap-2 mb-6">
+                            <button type="button" class="admin-tab active" data-admin-tab="departments">Department Management</button>
+                            <button type="button" class="admin-tab" data-admin-tab="categories">Asset Category Management</button>
+                            <button type="button" class="admin-tab" data-admin-tab="employees">Employee Directory</button>
+                        </div>
+
+                        <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6 flex-1 overflow-y-auto">
+                            <div id="admin-tab-departments" class="admin-tab-panel space-y-4">
+                                <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                                    <div class="lg:col-span-2">
+                                        <h3 class="text-lg font-bold text-slate-900 mb-3">Departments</h3>
+                                        <div id="admin-departments-list" class="space-y-3"></div>
+                                    </div>
+                                    <form id="department-form" class="bg-slate-50 rounded-xl p-4 border border-slate-200">
+                                        <h4 class="text-sm font-bold text-slate-900 mb-3">Create Department</h4>
+                                        <div class="space-y-3">
+                                            <input type="text" id="dep-name" placeholder="Department name" required class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm">
+                                            <select id="dep-head" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm"></select>
+                                            <select id="dep-status" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm">
+                                                <option value="Active">Active</option>
+                                                <option value="Inactive">Inactive</option>
+                                            </select>
+                                            <button type="submit" class="w-full px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700">Add Department</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <div id="admin-tab-categories" class="admin-tab-panel hide space-y-4">
+                                <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                                    <div class="lg:col-span-2">
+                                        <h3 class="text-lg font-bold text-slate-900 mb-3">Asset Categories</h3>
+                                        <div id="admin-categories-list" class="space-y-3"></div>
+                                    </div>
+                                    <form id="category-form" class="bg-slate-50 rounded-xl p-4 border border-slate-200">
+                                        <h4 class="text-sm font-bold text-slate-900 mb-3">Create Category</h4>
+                                        <div class="space-y-3">
+                                            <input type="text" id="cat-name" placeholder="Category name" required class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm">
+                                            <input type="text" id="cat-fields" placeholder="Optional fields (e.g. warranty period)" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm">
+                                            <button type="submit" class="w-full px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700">Add Category</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <div id="admin-tab-employees" class="admin-tab-panel hide space-y-4">
+                                <h3 class="text-lg font-bold text-slate-900 mb-3">Employee Directory</h3>
+                                <div id="admin-employees-list" class="space-y-3"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Placeholder View for other tabs -->
+                    <div id="view-placeholder" class="view-section hide h-full flex flex-col items-center justify-center text-center p-8 border-2 border-dashed border-slate-200 rounded-xl bg-slate-50/50">
+                        <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-sm border border-slate-100 mb-4 text-slate-400 text-2xl">
+                            <i class="fa-solid fa-wrench"></i>
+                        </div>
+                        <h2 class="text-xl font-bold text-slate-800 mb-2" id="placeholder-title">Module</h2>
+                        <p class="text-slate-500 max-w-md" id="placeholder-description">This module is presented as a frontend-only workflow preview for the current screen.</p>
+                    </div>
+
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Add Asset Modal -->
+    <div id="add-asset-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hide">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden transform transition-all">
+            <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center">
+                <h2 class="text-lg font-bold text-slate-900">Register New Asset</h2>
+                <button id="btn-close-modal" class="text-slate-400 hover:text-slate-600">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            <form id="add-asset-form" class="p-6 space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Asset Name</label>
+                    <input type="text" id="form-asset-name" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Serial Number</label>
+                    <input type="text" id="form-asset-serial" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Category</label>
+                    <select id="form-asset-category" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                        <option value="Electronics">Electronics</option>
+                        <option value="Furniture">Furniture</option>
+                        <option value="Vehicles">Vehicles</option>
+                        <option value="Shared Resource">Shared Resource</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Status</label>
+                    <select id="form-asset-status" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                        <option value="Available">Available</option>
+                        <option value="Allocated">Allocated</option>
+                        <option value="Under Maintenance">Under Maintenance</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Assigned Employee</label>
+                    <select id="form-asset-owner" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                        <option value="">Unassigned</option>
+                        <option value="u1">Sarah Jenkins</option>
+                        <option value="u2">David Chen</option>
+                        <option value="u3">Maya Patel</option>
+                        <option value="u4">Priya Sharma</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Department</label>
+                    <input type="text" id="form-asset-department" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Location</label>
+                    <input type="text" id="form-asset-location" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Purchase Date</label>
+                    <input type="date" id="form-asset-purchase-date" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Warranty Expiry</label>
+                    <input type="date" id="form-asset-warranty" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Cost</label>
+                    <input type="number" id="form-asset-cost" min="0" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+                <div class="pt-4 flex gap-3">
+                    <button type="button" id="btn-cancel-modal" class="flex-1 px-4 py-2 border border-slate-300 text-slate-700 rounded-lg font-medium hover:bg-slate-50">Cancel</button>
+                    <button type="submit" class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700">Register Asset</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="assetflow_frontend_app.js"></script>
+</body>
+</html>
